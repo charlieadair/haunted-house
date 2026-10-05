@@ -1,13 +1,32 @@
 from pathlib import Path
 from collections.abc import Callable
+import argparse
 
 def main():
-    print("==> RECURSIVE SOLUTION")
-    for test in 'test1', 'test2', 'test3':
-        print(f"{test}: {'PASS' if runTest(test, recursiveSolution) else 'FAIL'}")
-    print("==> DYNAMIC PROGRAMMING SOLUTION")
-    for test in 'test1', 'test2', 'test3':
-        print(f"{test}: {'PASS' if runTest(test, dpSolution) else 'FAIL'}")
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-t", "--test",
+        action="store_true",
+        help="Run tests"
+    )
+    args = parser.parse_args()
+
+    # Run tests if the --test flag is provided
+    if args.test:
+        print("==> RECURSIVE SOLUTION")
+        for test in 'test1', 'test2', 'test3':
+            print(f"{test}: {'PASS' if runTest(test, recursiveSolution) else 'FAIL'}")
+        print("==> DYNAMIC PROGRAMMING SOLUTION")
+        for test in 'test1', 'test2', 'test3':
+            print(f"{test}: {'PASS' if runTest(test, dpSolution) else 'FAIL'}")
+    # Read from standard input and call dpSolution
+    else:
+        n, k = map(int, input().split())
+        rooms = []
+        for _ in range(n):
+            left, right = map(int, input().split())
+            rooms.append([left, right])
+        print(dpSolution(n, k, rooms))
 
 def runTest(file_path: str | Path, solution: Callable[[int, int, list[list[int]]], int]
 ) -> bool:
@@ -15,8 +34,7 @@ def runTest(file_path: str | Path, solution: Callable[[int, int, list[list[int]]
 
         # Parse parameters n and k
         params = f.readline().strip().split()
-        n = int(params[0])
-        k = int(params[1])
+        n, k = int(params[0]), int(params[1])
 
         rooms = list[list[int]]()
         for line in f:
