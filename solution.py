@@ -2,12 +2,18 @@ from pathlib import Path
 from unittest import case
 from unittest import case
 from xmlrpc.client import MAXINT
+from collections.abc import Callable
 
 def main():
+    print("==> RECURSIVE SOLUTION")
     for tests in 'test1', 'test2', 'test3':
-        print(f"{tests}: {'PASS' if runTest(tests) else 'FAIL'}")
+        print(f"{tests}: {'PASS' if runTest(tests, recursiveSolution) else 'FAIL'}")
+    print("==> DYNAMIC PROGRAMMING SOLUTION")
+    for tests in 'test1', 'test2', 'test3':
+        print(f"{tests}: {'PASS' if runTest(tests, dpSolution) else 'FAIL'}")
 
-def runTest(file_path: str | Path) -> bool:
+def runTest(file_path: str | Path, solution: Callable[[int, int, list[list[int]]], int]
+) -> bool:
     with open(file_path, "r") as f:
 
         # Parse parameters n and k
@@ -27,7 +33,7 @@ def runTest(file_path: str | Path) -> bool:
         return expected == actual;
         
 
-def solution(n: int, k: int, rooms: list[list[int]]) -> int:
+def recursiveSolution(n: int, k: int, rooms: list[list[int]]) -> int:
     def best(row: int, remaining: int, previous: str) -> int:
 
         if remaining == 0: return sum(left + right for left, right in rooms[row:])
@@ -50,6 +56,13 @@ def solution(n: int, k: int, rooms: list[list[int]]) -> int:
         return answer
 
     return best(0, k, "neither")
+
+def dpSolution(n: int, k: int, rooms: list[list[int]]) -> int:
+
+    # init a 3D array — dp[row][remaining][previous]
+    dp = [[[0 for _ in range(len(rooms))] for _ in range(k + 1)] for _ in range(n)]
+    return 0;
+
         
 
 if __name__ == "__main__":
