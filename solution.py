@@ -1,16 +1,13 @@
 from pathlib import Path
-from unittest import case
-from unittest import case
-from xmlrpc.client import MAXINT
 from collections.abc import Callable
 
 def main():
     print("==> RECURSIVE SOLUTION")
-    for tests in 'test1', 'test2', 'test3':
-        print(f"{tests}: {'PASS' if runTest(tests, recursiveSolution) else 'FAIL'}")
+    for test in 'test1', 'test2', 'test3':
+        print(f"{test}: {'PASS' if runTest(test, recursiveSolution) else 'FAIL'}")
     print("==> DYNAMIC PROGRAMMING SOLUTION")
-    for tests in 'test1', 'test2', 'test3':
-        print(f"{tests}: {'PASS' if runTest(tests, dpSolution) else 'FAIL'}")
+    for test in 'test1', 'test2', 'test3':
+        print(f"{test}: {'PASS' if runTest(test, dpSolution) else 'FAIL'}")
 
 def runTest(file_path: str | Path, solution: Callable[[int, int, list[list[int]]], int]
 ) -> bool:
@@ -28,9 +25,9 @@ def runTest(file_path: str | Path, solution: Callable[[int, int, list[list[int]]
             rooms.append([int(x) for x in p])
 
         expected = int(f.read().strip().split()[0])
-        actual = solution(n, k, rooms);
+        actual = solution(n, k, rooms)
 
-        return expected == actual;
+        return expected == actual
         
 
 def recursiveSolution(n: int, k: int, rooms: list[list[int]]) -> int:
@@ -59,11 +56,37 @@ def recursiveSolution(n: int, k: int, rooms: list[list[int]]) -> int:
 
 def dpSolution(n: int, k: int, rooms: list[list[int]]) -> int:
 
-    # init a 3D array — dp[row][remaining][previous]
-    dp = [[[0 for _ in range(len(rooms))] for _ in range(k + 1)] for _ in range(n)]
-    return 0;
+    NEITHER, LEFT, RIGHT = 0, 1, 2
 
-        
+    # init a 3D array — dp[row][remaining doors to close][previous choice (neither/left/right)].
+    # Assume all entries are invalid solutions at first (-inf)
+    dp = [[[float("-inf")]   * 3 for _ in range(k + 1)]   for _ in range(n + 1)]
+
+    for previous in range(3):
+        dp[n][0][previous] = 0
+
+    for row in range(n - 1, -1, -1):
+
+        for previous in range(3):
+
+            left, right = rooms[row]
+
+            for remaining in range(k + 1):
+                # keep both rooms open 
+                answer = left + right + dp[row + 1][remaining][NEITHER]
+                if remaining > 0:
+
+                    # if previous door was left -> you can calculate the maximum if you chose right, and vice versa.
+                    # if previous was neither -> calculate the maximum for both choices
+                    if previous != LEFT:
+                        answer = max(answer, left + dp[row + 1][remaining - 1][RIGHT])
+                    if previous != RIGHT:
+                        answer = max(answer, right + dp[row + 1][remaining - 1][LEFT])
+
+                dp[row][remaining][previous] = answer
+
+    return dp[0][k][NEITHER]
+
 
 if __name__ == "__main__":
     main()
